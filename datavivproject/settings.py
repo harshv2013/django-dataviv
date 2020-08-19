@@ -87,9 +87,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'cameradb',
-        'USER': 'datavivai2085',
-        'PASSWORD': 'secure@dataviv123',
-        'HOST': '34.93.62.141',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
         # 'PORT': '5432'
     }
 }
