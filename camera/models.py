@@ -1,5 +1,20 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+import os
+from uuid import uuid4
+
+
+def path_and_rename(instance, filename):
+    upload_to = 'Face_data'
+    ext = filename.split('.')[-1]
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid4().hex, ext)
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
 
 
 class Student(models.Model):
@@ -20,6 +35,8 @@ class Employee(models.Model):
     name = models.CharField(max_length=200)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES) 
     age = models.PositiveIntegerField()
+    # employee_media = models.FileField(upload_to='Face_data')
+    employee_media = models.FileField(upload_to=path_and_rename)
 
 
 class Store(models.Model):
@@ -52,12 +69,4 @@ class DailyLog(models.Model):
         Store, related_name='dailylogs', on_delete=models.CASCADE)
     organization = models.ForeignKey(
         Organization, related_name='dailylogs', on_delete=models.CASCADE)
-
-
-
-
-    
-
-
-
 

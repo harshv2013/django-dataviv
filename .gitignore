@@ -56,3 +56,10 @@ coverage.xml
 
 # Translations
 *.mo
+
+
+google-key.json
+media/
+verify.py
+ven/
+*/__pycache__/*
