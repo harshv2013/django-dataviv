@@ -1,8 +1,7 @@
 from django.urls import path
 
-from .views import index, StudentView,  StudentList, StudentDetail,\
-    EmployeeList, UserCreate, LoginView, UserList, UserDetail
-
+from .views import index, StudentView, StudentList, StudentDetail, \
+    EmployeeList, UserCreate, LoginView, UserList, UserDetail, EmployeeDetail
 
 urlpatterns = [
     path('', index, name='index'),
@@ -10,6 +9,7 @@ urlpatterns = [
     path('student/', StudentList.as_view(), name='category-list'),
     path('student/<int:pk>', StudentDetail.as_view(), name='category-detail'),
     path('employee/', EmployeeList.as_view(), name='employee-list'),
+    path('employee/<int:pk>', EmployeeDetail.as_view(), name='employee-list'),
     path("usercreate/", UserCreate.as_view(), name="user_create"),
     path("login/", LoginView.as_view(), name="login"),
     path('users/', UserList.as_view()),

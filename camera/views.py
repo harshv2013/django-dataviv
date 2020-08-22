@@ -81,6 +81,34 @@ class EmployeeList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class EmployeeDetail(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Employee.objects.get(pk=pk)
+        except Employee.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        employee = self.get_object(pk)
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        employee = self.get_object(pk)
+        serializer = Employee(employee, data=request.DATA)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        student = self.get_object(pk)
+        student.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 ###################################################################################
 #############################
 class UserCreate(generics.CreateAPIView):
@@ -99,6 +127,7 @@ class UserCreate(generics.CreateAPIView):
         # user = User.objects.get(pk=pk_of_user_without_token)
         token = Token.objects.create(user=serializer.instance)
         print('token---------------------', token)
+        print('serializer.data in UserCreate in create defn is -------------',serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class LoginView(APIView):
