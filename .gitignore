@@ -63,3 +63,4 @@ media/
 verify.py
 ven/
 */__pycache__/*
+datavivproject/settings.py
