@@ -1,5 +1,5 @@
 from google.oauth2 import service_account
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file("/home/harsh/camera_dataviv/google-key.json")
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file("/home/harsh/django-dataviv/google-key.json")
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'face_records'
@@ -7,6 +7,7 @@ STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 
 import os
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -83,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'cameradb',
         'USER': 'datavivai2085',
-        'PASSWORD': '',
+        'PASSWORD': 'secure@dataviv123',
         'HOST': '34.93.62.141',
         # 'PORT': '5432'
     }
@@ -130,3 +131,25 @@ STATIC_URL = '/static/'
 #
 # MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+AUTH_USER_MODEL = 'camera.User'
+
+# REST_FRAMEWORK = {
+#     "DEFAULT_AUTHENTICATION_CLASSES": [
+#         "rest_framework.authentication.TokenAuthentication",
+#         "rest_framework.authentication.SessionAuthentication",
+#     ],
+#     "DEFAULT_PERMISSION_CLASSES": [
+#         "rest_framework.permissions.IsAuthenticated",
+#         "rest_framework.permissions.DjangoModelPermissions",
+#     ],
+# }
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
