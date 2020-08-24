@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 import os
 from uuid import uuid4
 
+
 def path_and_rename(instance, filename):
     upload_to = 'Face_data'
     ext = filename.split('.')[-1]
@@ -15,6 +16,7 @@ def path_and_rename(instance, filename):
         filename = '{}.{}'.format(uuid4().hex, ext)
     # return the whole path to the file
     return os.path.join(upload_to, filename)
+
 
 class Organization(models.Model):
     name = models.CharField(max_length=200)
@@ -36,7 +38,8 @@ class Store(models.Model):
 
 
 class StoreManager(User):
-    store = models.OneToOneField(Store, on_delete=models.DO_NOTHING, default=None)
+    store = models.OneToOneField(
+        Store, on_delete=models.DO_NOTHING, default=None)
 
 
 class Employee(models.Model):
@@ -51,6 +54,7 @@ class Employee(models.Model):
     employee_media = models.FileField(upload_to=path_and_rename)
     store = models.ForeignKey(
         Store, related_name='employees', on_delete=models.DO_NOTHING)
+
 
 class Analytic(models.Model):
     in_time = models.DateTimeField()
@@ -70,4 +74,3 @@ class DailyLog(models.Model):
         Store, related_name='dailylogs', on_delete=models.DO_NOTHING)
     # organization = models.ForeignKey(
     #     Organization, related_name='dailylogs', on_delete=models.CASCADE)
-
