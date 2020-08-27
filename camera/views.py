@@ -22,13 +22,13 @@ def index(request):
 class OrganizationListCreate(generics.ListCreateAPIView):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 class OrganizationRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 ##########################################################################
 '''

@@ -59,6 +59,8 @@ class Employee(models.Model):
 class Analytic(models.Model):
     in_time = models.DateTimeField()
     out_time = models.DateTimeField()
+    store_heat_map = models.FileField(upload_to=path_and_rename)
+    store_hot_zone = models.FileField(upload_to=path_and_rename)
     # store = models.ForeignKey(
     #     Store, related_name='analytics', on_delete=models.CASCADE)
     # organization = models.ForeignKey(
