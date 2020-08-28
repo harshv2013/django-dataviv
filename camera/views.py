@@ -31,12 +31,13 @@ class OrganizationRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 ##########################################################################
-'''
+
 class EmployeeList(APIView):
     """
     List all snippets, or create a new snippet.
     """
     def get(self, request, format=None):
+        print('in get list ------',request.query_params.get('pk', None))
         employee = Employee.objects.all()
         serializer = EmployeeSerializer(employee, many=True)
         return Response(serializer.data)
@@ -59,6 +60,7 @@ class EmployeeDetail(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
+        print('in detal pk-------------',request.query_params.get('pk', None))
         employee = self.get_object(pk)
         serializer = EmployeeSerializer(employee)
         return Response(serializer.data)
@@ -75,7 +77,7 @@ class EmployeeDetail(APIView):
         student = self.get_object(pk)
         student.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-'''
+
 ###################################################################################
 
 class EmployeeListCreate(generics.ListCreateAPIView):
@@ -129,6 +131,16 @@ class LoginView(APIView):
         else:
             return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
+class EmployeeDetailView2(APIView):
+    permission_classes = ()
+
+    def post(self, request,):
+        pk = request.data.get("pk")
+        print('id is ------------',pk)
+        employee = Employee.objects.get(pk=pk)
+        print('employee----',employee)
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data)
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
