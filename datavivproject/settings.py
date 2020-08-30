@@ -22,7 +22,7 @@ SECRET_KEY = 'bk=g@0ht3onbbi6hus)le%+oqhk0tc_3+mg=tkqt4yyo9tdy-w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['34.67.208.63', 'localhost']
 
 
 # Application definition
@@ -83,9 +83,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'cameradb',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
+        'USER': 'datavivai2085',
+        'PASSWORD': 'secure@dataviv123',
+        'HOST': '34.93.62.141',
         # 'PORT': '5432'
     }
 }
@@ -128,6 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 #
 # MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 

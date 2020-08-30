@@ -59,14 +59,39 @@ class Employee(models.Model):
 class Analytic(models.Model):
     in_time = models.DateTimeField()
     out_time = models.DateTimeField()
-    store_heat_map = models.FileField(upload_to=path_and_rename)
-    store_hot_zone = models.FileField(upload_to=path_and_rename)
+    store_heat_map = models.FileField(upload_to=path_and_rename, default=None)
+    store_hot_zone = models.FileField(upload_to=path_and_rename, default=None)
     # store = models.ForeignKey(
     #     Store, related_name='analytics', on_delete=models.CASCADE)
     # organization = models.ForeignKey(
     #     Organization, related_name='analytics', on_delete=models.CASCADE)
     employee = models.ForeignKey(
-        Employee, related_name='analytics', on_delete=models.DO_NOTHING)
+        Employee, related_name='analytics', on_delete=models.DO_NOTHING, default=None)
+
+
+class AnalyticDisplay(models.Model):
+    store_heat_map = models.ImageField(upload_to=path_and_rename)
+    store_hot_zone = models.ImageField(upload_to=path_and_rename)
+    gender = models.ImageField(upload_to=path_and_rename)
+    duration_of_visit = models.ImageField(upload_to=path_and_rename)
+    no_of_purchasing_visit = models.IntegerField()
+    no_of_missed_customers = models.IntegerField()
+    days_with_most_walkings = models.ImageField(upload_to=path_and_rename)
+    average_employee_count = models.ImageField(upload_to=path_and_rename)
+    average_line_length = models.ImageField(upload_to=path_and_rename)
+    time_analysis = models.ImageField(upload_to=path_and_rename)
+
+
+class TotalDisplay(models.Model):
+    total_walkings = models.IntegerField()
+    clients = models.CharField(max_length=200)
+    customer_flow = models.ImageField(upload_to=path_and_rename)
+    number_of_family_member = models.IntegerField()
+    client_gender = models.CharField(max_length=200)
+    client_age = models.IntegerField()
+    client_purchase_amount = models.FloatField()
+    client_previous_visit_time = models.DateTimeField()
+    client_visits_this_month = models.IntegerField()
 
 
 class DailyLog(models.Model):

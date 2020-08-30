@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from camera.models import Employee, Organization, Store, User
+from camera.models import Employee, Organization, Store, User, \
+    Analytic, AnalyticDisplay, TotalDisplay
 
 
 ########################################################
@@ -9,12 +10,35 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = "__all__"
 
+
 #########################################################
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = "__all__"
 ##########################################################
+
+
+class AnalyticSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analytic
+        fields = "__all__"
+##########################################################
+
+
+class AnalyticDisplaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnalyticDisplay
+        fields = "__all__"
+##########################################################
+
+
+class TotalDisplaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TotalDisplay
+        fields = "__all__"
+##########################################################
+
 
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
