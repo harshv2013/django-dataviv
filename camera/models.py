@@ -73,6 +73,7 @@ class AnalyticDisplay(models.Model):
     store_heat_map = models.ImageField(upload_to=path_and_rename)
     store_hot_zone = models.ImageField(upload_to=path_and_rename)
     gender = models.ImageField(upload_to=path_and_rename)
+    age = models.ImageField(upload_to=path_and_rename)
     duration_of_visit = models.ImageField(upload_to=path_and_rename)
     no_of_purchasing_visit = models.IntegerField()
     no_of_missed_customers = models.IntegerField()

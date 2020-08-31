@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'datavivproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cameradb',
+        'NAME': 'camerax',
         'USER': 'datavivai2085',
         'PASSWORD': 'secure@dataviv123',
         'HOST': '34.93.62.141',
