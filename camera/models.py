@@ -102,3 +102,16 @@ class DailyLog(models.Model):
         Store, related_name='dailylogs', on_delete=models.DO_NOTHING)
     # organization = models.ForeignKey(
     #     Organization, related_name='dailylogs', on_delete=models.CASCADE)
+
+
+# class Client(models.Model):
+#     client = models.CharField(max_length=200)
+#     entry_time = models.TimeField(default='12:34:56.000000')
+#     exit_time = models.TimeField(default='13:34:56.000000')
+#     customer_flow = models.ImageField(upload_to=path_and_rename)
+#     number_of_family_member = models.IntegerField()
+#     client_gender = models.CharField(max_length=200)
+#     client_age = models.IntegerField()
+#     client_purchase_amount = models.FloatField()
+#     client_previous_visit_time = models.DateTimeField()
+#     client_visits_this_month = models.IntegerField()

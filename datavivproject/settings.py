@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'camera',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_rest_passwordreset',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +155,16 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     )
 }
+
+
+DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # time in hours about how long the token is active (Default: 24)
+# DJANGO_REST_LOOKUP_FIELD = 'custom_email_field'
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator",
+    "OPTIONS": {
+        "min_length": 20,
+        "max_length": 30
+    }
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
