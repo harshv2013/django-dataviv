@@ -1,3 +1,7 @@
+from django.core import mail
+connection = mail.get_connection()
+
+
 from django.contrib.auth import authenticate
 # from django.contrib.auth.models import User
 from django.http import HttpResponse, Http404
@@ -45,6 +49,21 @@ class EmployeeListCreate(APIView):
     List all snippets, or create a new snippet.
     """
     def get(self, request, format=None):
+        # Manually open the connection
+        connection.open()
+
+        # Construct an email message that uses the connection
+        email1 = mail.EmailMessage(
+            'Hello',
+            'Body goes here',
+            'harsh2013@gmail.com',
+            ['harsh2013@gmail.com'],
+            connection=connection,
+        )
+        email1.send()  # Send the email
+
+        connection.close()
+
         print('in get list ------',request.query_params.get('pk', None))
         employee = Employee.objects.all()
         serializer = EmployeeSerializer(employee, many=True)
@@ -214,3 +233,50 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+from django.core.mail import EmailMultiAlternatives
+from django.dispatch import receiver
+from django.template.loader import render_to_string
+from django.urls import reverse
+
+from django_rest_passwordreset.signals import reset_password_token_created
+
+
+@receiver(reset_password_token_created)
+def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
+    """
+    Handles password reset tokens
+    When a token is created, an e-mail needs to be sent to the user
+    :param sender: View Class that sent the signal
+    :param instance: View Instance that sent the signal
+    :param reset_password_token: Token Model Object
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    # send an e-mail to the user
+    context = {
+        'current_user': reset_password_token.user,
+        'username': reset_password_token.user.username,
+        'email': reset_password_token.user.email,
+        'token':reset_password_token.key,
+        'reset_password_url': "{}?token={}".format(reverse('password_reset:reset-password-request'), reset_password_token.key)
+    }
+
+    # render email text
+    email_html_message = render_to_string('camera/user_reset_password.html', context)
+    email_plaintext_message = render_to_string('camera/user_reset_password.txt', context)
+
+    msg = EmailMultiAlternatives(
+        # title:
+        "Password Reset for {title}".format(title="Some website title"),
+        # message:
+        email_plaintext_message,
+        # from:
+        "noreply@somehost.local",
+        # to:
+        [reset_password_token.user.email]
+    )
+    msg.attach_alternative(email_html_message, "text/html")
+    msg.send()
