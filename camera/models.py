@@ -26,6 +26,15 @@ class Organization(models.Model):
 class User(AbstractUser):
     pass
 
+#########################################
+
+
+class TestUser2(models.Model):
+    name = models.CharField(max_length=200)
+    testuser_media = models.FileField()
+    
+#######################################
+
 
 class Store(models.Model):
     location = models.CharField(max_length=200)
@@ -48,8 +57,11 @@ class Employee(models.Model):
         ('F', 'Female'),
     )
     name = models.CharField(max_length=200)
+    email = models.EmailField(default="")
+    contact = models.CharField(max_length=200, default="")
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     age = models.PositiveIntegerField()
+    address = models.CharField(max_length=200, default="")
     # employee_media = models.FileField(upload_to='Face_data')
     employee_media = models.FileField(upload_to=path_and_rename)
     store = models.ForeignKey(
@@ -104,14 +116,34 @@ class DailyLog(models.Model):
     #     Organization, related_name='dailylogs', on_delete=models.CASCADE)
 
 
-# class Client(models.Model):
-#     client = models.CharField(max_length=200)
-#     entry_time = models.TimeField(default='12:34:56.000000')
-#     exit_time = models.TimeField(default='13:34:56.000000')
-#     customer_flow = models.ImageField(upload_to=path_and_rename)
-#     number_of_family_member = models.IntegerField()
-#     client_gender = models.CharField(max_length=200)
-#     client_age = models.IntegerField()
-#     client_purchase_amount = models.FloatField()
-#     client_previous_visit_time = models.DateTimeField()
-#     client_visits_this_month = models.IntegerField()
+class Client(models.Model):
+    client_name = models.CharField(max_length=200)
+    entry_time = models.TimeField(default='12:34:56.000000')
+    exit_time = models.TimeField(default='13:34:56.000000')
+    customer_flow = models.ImageField(upload_to=path_and_rename)
+    number_of_family_member = models.IntegerField()
+    client_gender = models.CharField(max_length=200)
+    client_age = models.IntegerField()
+    client_purchase_amount = models.FloatField()
+    client_previous_visit_time = models.DateTimeField(auto_now=True)
+    client_visits_this_month = models.IntegerField()
+
+
+class AnalyticEntry(models.Model):
+    AvgMaleCount = models.IntegerField()
+    AvgFemaleCount = models.IntegerField()
+    Ageunder18 = models.IntegerField()
+    Age18to24 = models.IntegerField()
+    Age25to34 = models.IntegerField()
+    Age35to44 = models.IntegerField()
+    Age45to54 = models.IntegerField()
+    Age55to64 = models.IntegerField()
+    Age65above = models.IntegerField()
+    Totalin = models.IntegerField()
+    Totalout = models.IntegerField()
+    AvgMissedcustomer = models.IntegerField()
+    AvgPurchasedvisit = models.IntegerField()
+    Avglinelength = models.IntegerField()
+    DateTime = models.DateTimeField(auto_now=True)
+    store = models.ForeignKey(
+        Store, related_name='analyticentrys', on_delete=models.DO_NOTHING)

@@ -13,11 +13,13 @@ from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.authtoken.models import Token
 from camera.models import Employee, Organization, Store, User, \
-    Analytic, AnalyticDisplay, TotalDisplay
+    Analytic, AnalyticDisplay, TotalDisplay, Client, \
+    AnalyticEntry, TestUser2
 from camera.permissions import IsOwnerOrReadOnly
 from camera.serializers import EmployeeSerializer, \
     UserSerializer, OrganizationSerializer, StoreSerializer, \
-    AnalyticSerializer, AnalyticDisplaySerializer, TotalDisplaySerializer
+    AnalyticSerializer, AnalyticDisplaySerializer, TotalDisplaySerializer, \
+    ClientSerializer, AnalyticEntrySerializer, TestUserSerializer
 
 
 
@@ -41,6 +43,20 @@ class OrganizationRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrganizationSerializer
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
+#############################################################################
+
+
+class TestUserListCreate(generics.ListCreateAPIView):
+    queryset = TestUser2.objects.all()
+    serializer_class = TestUserSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+
+class TestUserRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TestUser2.objects.all()
+    serializer_class = TestUserSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
 ##########################################################################
 
 
@@ -49,20 +65,6 @@ class EmployeeListCreate(APIView):
     List all snippets, or create a new snippet.
     """
     def get(self, request, format=None):
-        # Manually open the connection
-        connection.open()
-
-        # Construct an email message that uses the connection
-        email1 = mail.EmailMessage(
-            'Hello',
-            'Body goes here',
-            'harsh2013@gmail.com',
-            ['harsh2013@gmail.com'],
-            connection=connection,
-        )
-        email1.send()  # Send the email
-
-        connection.close()
 
         print('in get list ------',request.query_params.get('pk', None))
         employee = Employee.objects.all()
@@ -95,7 +97,7 @@ class EmployeeRetriveUpdateDestroy(APIView):
 
     def put(self, request, pk, format=None):
         employee = self.get_object(pk)
-        serializer = Employee(employee, data=request.data)
+        serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -103,7 +105,7 @@ class EmployeeRetriveUpdateDestroy(APIView):
 
     def patch(self, request, pk, format=None):
         employee = self.get_object(pk)
-        serializer = Employee(employee, data=request.data)
+        serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -172,8 +174,130 @@ class TotalDisplayRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = TotalDisplay.objects.all()
     serializer_class = TotalDisplaySerializer
 
+#########################################################################
+#########################################################################
 
+
+class ClientListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        client = Client.objects.all()
+        serializer = ClientSerializer(client, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = ClientSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClientRetriveUpdateDestroy(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Client.objects.get(pk=pk)
+        except Client.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        print('pk-------------',pk)
+        client = self.get_object(pk)
+        serializer = ClientSerializer(client)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        client = self.get_object(pk)
+        serializer = ClientSerializer(client, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        client = self.get_object(pk)
+        serializer = ClientSerializer(client, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        client = self.get_object(pk)
+        client.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+#########################################################################
 ##########################################################################
+# ############$$$$$$$$$$$$$$$$$$$$$$$$$$$$#################################
+#########################################################################
+
+
+class AnalyticEntryListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        analyticentry = AnalyticEntry.objects.all()
+        serializer = AnalyticEntrySerializer(analyticentry, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = AnalyticEntrySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AnalyticEntryRetriveUpdateDestroy(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return AnalyticEntry.objects.get(pk=pk)
+        except AnalyticEntry.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        print('pk-------------',pk)
+        analyticentry = self.get_object(pk)
+        serializer = AnalyticEntrySerializer(analyticentry)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        analyticentry = self.get_object(pk)
+        serializer = AnalyticEntrySerializer(analyticentry, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        analyticentry = self.get_object(pk)
+        serializer = AnalyticEntrySerializer(analyticentry, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        analyticentry = self.get_object(pk)
+        analyticentry.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+#########################################################################
+# ############$$$$$$$$$$$$$$$$$$$$$$$$$$$$$################################
+
+
 class UserCreate(generics.CreateAPIView):
     authentication_classes = ()
     permission_classes = ()

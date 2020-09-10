@@ -2,7 +2,7 @@ from google.oauth2 import service_account
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file("/home/harsh/django-dataviv/google-key.json")
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'face_records'
+GS_BUCKET_NAME = 'camerax-bucket'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 
 import os
@@ -22,7 +22,7 @@ SECRET_KEY = 'bk=g@0ht3onbbi6hus)le%+oqhk0tc_3+mg=tkqt4yyo9tdy-w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['34.67.208.63', 'localhost']
+ALLOWED_HOSTS = ['34.66.241.156', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -86,7 +86,7 @@ DATABASES = {
         'NAME': 'camerax',
         'USER': 'datavivai2085',
         'PASSWORD': 'secure@dataviv123',
-        'HOST': '34.93.62.141',
+        'HOST': '35.232.103.138',
         # 'PORT': '5432'
     }
 }
@@ -167,4 +167,11 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'vedant.dataviv@gmail.com'
+EMAIL_HOST_PASSWORD = 'Dataviv@123'
+

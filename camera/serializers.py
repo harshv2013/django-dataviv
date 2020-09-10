@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from camera.models import Employee, Organization, Store, User, \
-    Analytic, AnalyticDisplay, TotalDisplay
+    Analytic, AnalyticDisplay, TotalDisplay, Client, \
+    AnalyticEntry, TestUser2
 
 
 ########################################################
@@ -9,9 +10,17 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = "__all__"
+#########################################################
 
+
+class TestUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestUser2
+        fields = "__all__"
 
 #########################################################
+
+
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
@@ -37,6 +46,22 @@ class TotalDisplaySerializer(serializers.ModelSerializer):
     class Meta:
         model = TotalDisplay
         fields = "__all__"
+##########################################################
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = "__all__"
+
+##########################################################
+
+
+class AnalyticEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnalyticEntry
+        fields = "__all__"
+
 ##########################################################
 
 
@@ -66,7 +91,5 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-
 
 
