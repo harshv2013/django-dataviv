@@ -12,8 +12,9 @@ from .views import index, \
     AnalyticDisplayRetriveUpdateDestroy, \
     TotalDisplayListCreate, TotalDisplayRetriveUpdateDestroy, \
     ClientListCreate, ClientRetriveUpdateDestroy, \
-    AnalyticEntryListCreate, AnalyticEntryRetriveUpdateDestroy, \
-    TestUserListCreate, TestUserRetriveUpdateDestroy
+    AnalyticEntryListCreate, AnalyticEntryRetriveUpdateDestroy,\
+    TestUserListCreate, TestUserRetriveUpdateDestroy, EmployeeMediaListCreate
+    # TestUserListCreate, TestUserRetriveUpdateDestroy
     #  EmployeeList, EmployeeDetail, EmployeeDetailView2
 
 app_name = 'camera'
@@ -30,8 +31,9 @@ urlpatterns = [
     # url('^employ/(?P<pk>[0-9]+)/$', EmployeeDetail.as_view(), name='employee-list'),
     # path('employedetail/', EmployeeDetailView2.as_view(), name='employee-detail2'),
 
-    # path('testuser/', TestUserListCreate.as_view(), name='testuser-list'),
-    # path('testuser/<int:pk>', TestUserRetriveUpdateDestroy.as_view(), name='testuser-detail'),
+    path('testuser/', TestUserListCreate.as_view(), name='testuser-list'),
+    path('employeemedia/', EmployeeMediaListCreate.as_view(), name='employeemedia-list'),
+    path('testuser/<int:pk>', TestUserRetriveUpdateDestroy.as_view(), name='testuser-detail'),
 
 
     path('employee/', EmployeeListCreate.as_view(), name='employee-list'),

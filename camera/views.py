@@ -1,7 +1,7 @@
 from django.core import mail
 connection = mail.get_connection()
-
-
+import threading
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser, FileUploadParser
 from django.contrib.auth import authenticate
 # from django.contrib.auth.models import User
 from django.http import HttpResponse, Http404
@@ -14,15 +14,14 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.authtoken.models import Token
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
-    AnalyticEntry, TestUser2
+    AnalyticEntry, TestUser, EmployeeMedia
 from camera.permissions import IsOwnerOrReadOnly
 from camera.serializers import EmployeeSerializer, \
     UserSerializer, OrganizationSerializer, StoreSerializer, \
     AnalyticSerializer, AnalyticDisplaySerializer, TotalDisplaySerializer, \
-    ClientSerializer, AnalyticEntrySerializer, TestUserSerializer
+    ClientSerializer, AnalyticEntrySerializer, TestUserSerializer, EmployeeMediaSerializer
 
-
-
+from camera.encode_faces import face_embedding
 
 
 
@@ -46,21 +45,53 @@ class OrganizationRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 #############################################################################
 
 
-class TestUserListCreate(generics.ListCreateAPIView):
-    queryset = TestUser2.objects.all()
-    serializer_class = TestUserSerializer
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+# class TestUserListCreate(generics.ListCreateAPIView):
+#     queryset = TestUser.objects.all()
+#     serializer_class = TestUserSerializer
+#     # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+
+# class TestUserRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = TestUser.objects.all()
+#     serializer_class = TestUserSerializer
+#     # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+
+class TestUserListCreate(APIView):
+
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        testuser = TestUser.objects.all()
+        serializer = TestUserSerializer(testuser, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        data=request.data
+        print('data---',data.__dict__)
+        t = TestUser.objects.create(media = data['media'])
+        t.save()
+        # serializer = TestUserSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"Created"} )
 
 
 class TestUserRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = TestUser2.objects.all()
+    queryset = TestUser.objects.all()
     serializer_class = TestUserSerializer
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
 
 ##########################################################################
 
 
 class EmployeeListCreate(APIView):
+    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     """
     List all snippets, or create a new snippet.
     """
@@ -72,14 +103,135 @@ class EmployeeListCreate(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        print('req data ----',request.data)
         serializer = EmployeeSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=self.request.user)
+            print(' store id is--', serializer.data['store'])
+            print(' employee id is--', serializer.data['id'])
+            print('employee media is--', serializer.data['employee_media'])
+            # f = open("embedding/myfile.txt", "w")
+            # f.write("Now the file has more content3!")
+            # f.close()
+            storage_path = "embedding"
+            storeid = serializer.data['store']
+            empid = serializer.data['id']
+            video_file = serializer.data['employee_media']
+            t1 = threading.Thread(target=face_embedding,args=([storage_path, storeid, empid, video_file,]),daemon=True)
+            t1.start()
+            # face_embedding(storage_path, storeid, empid, video_file)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+'''
+class EmployeeListCreate(APIView):
+    # parser_classes = (JSONParser,)
+    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
+    # parser_classes = (FileUploadParser,)
 
 
+    def get(self, request, format=None):
+
+        print('in get list ------',request.query_params.get('pk', None))
+        employee = Employee.objects.all()
+        serializer = EmployeeSerializer(employee, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        print('req data ----', request.data)
+        print('req data ----', request.FILES)
+        try:
+            data=request.data
+            name=data['name']
+            email=data['email']
+            contact=data['contact']
+            gender=data['gender']
+            age=data['age']
+            address=data['address']
+            # employee_media=data['employee_media']
+            employee_media=data.get('employee_media',False)
+            store_id=data['store']
+
+            store=Store.objects.get(id = store_id)
+            ##############
+            # print('data---',data.__dict__)
+            # employee_id = data['employee']
+            # print('employee_id-------------------',employee_id)
+            # employee = Employee.objects.get(id = employee_id )
+            # print('employee instance is -------------', employee)
+            e = Employee.objects.create(
+                name= name,
+                email= email,
+                contact= contact,
+                gender= gender,
+                age= age,
+                address= address,
+                employee_media = employee_media,
+                store = store
+                
+                )
+
+            e.save()
+
+            # print('employee ------------------', e.employee_media)
+            # print('employee details are ',e.id,e.store,e.employee_media)
+
+            serializer = EmployeeSerializer(e)
+            print('-----------*******************-----------------------',serializer.data)
+            storage_path = "embedding"
+            storeid = serializer.data['store']
+            empid = serializer.data['id']
+            video_file = serializer.data['employee_media']
+            print('details to embedding -----',storeid,empid,video_file)
+            t1 = threading.Thread(target=face_embedding,args=([storage_path, storeid, empid, video_file,]),daemon=True)
+            t1.start()
+
+            return Response({"message":"created"},status=status.HTTP_201_CREATED)
+        except:
+            return Response( {"message":"Error"},status=status.HTTP_400_BAD_REQUEST)
+
+        
+
+
+    # def post(self, request, format=None):
+    #     print('req data ----',request.data)
+    #     data=request.data
+    #     print('data---',data.__dict__)
+    #     if True:
+    #         e = Employee.objects.create(
+    #             name = data['name'],
+    #             email = data['email'],
+    #             contact=data['contact'],
+    #             gender = data['gender'],
+    #             age = data['age'],
+    #             address = data['address'],
+    #             employee_media = data['employee_media'],
+    #             store = data['store']                    
+    #             )
+    #         e.save()
+    #         # serializer = EmployeeSerializer(data=request.data)
+    #         # if serializer.is_valid():
+    #         #     serializer.save()
+    #         #     print(' store id is--', serializer.data['store'])
+    #         #     print(' employee id is--', serializer.data['id'])
+    #         #     print('employee media is--', serializer.data['employee_media'])
+    #         #     # f = open("embedding/myfile.txt", "w")
+    #         #     # f.write("Now the file has more content3!")
+    #         #     # f.close()
+    #         storage_path = "embedding"
+    #         storeid = e.store
+    #         empid = e.id
+    #         video_file = e.employee_media
+    #         t1 = threading.Thread(target=face_embedding,args=([storage_path, storeid, empid, video_file,]),daemon=True)
+    #         t1.start()
+    #         # face_embedding(storage_path, storeid, empid, video_file)
+    #         return Response( status=status.HTTP_201_CREATED)
+    #     # except:
+    #     else:
+    #         return Response( status=status.HTTP_400_BAD_REQUEST)
+'''
 class EmployeeRetriveUpdateDestroy(APIView):
+    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     """
     Retrieve, update or delete a snippet instance.
     """
@@ -99,7 +251,7 @@ class EmployeeRetriveUpdateDestroy(APIView):
         employee = self.get_object(pk)
         serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=self.request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -107,7 +259,7 @@ class EmployeeRetriveUpdateDestroy(APIView):
         employee = self.get_object(pk)
         serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=self.request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -126,6 +278,45 @@ class EmployeeRetriveUpdateDestroy(APIView):
 # class EmployeeRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 #     queryset = Employee.objects.all()
 #     serializer_class = EmployeeSerializer
+
+##########################################################################
+class EmployeeMediaListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------',request.query_params.get('pk', None))
+        employee = Employee.objects.all()
+        serializer = EmployeeSerializer(employee, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        print('req data ----',request.data)
+        data=request.data
+        print('data---',data.__dict__)
+        employee_id = data['employee']
+        print('employee_id-------------------',employee_id)
+        employee = Employee.objects.get(id = employee_id )
+        print('employee instance is -------------', employee)
+        em = EmployeeMedia.objects.create(employee_media = data['employee_media'], employee = employee)
+        em.save()
+        serializer = EmployeeMediaSerializer(em)
+        print('-----------*******************-----------------------',serializer.data)
+        storage_path = "embedding"
+        storeid = 1
+        empid = serializer.data['employee']
+        video_file = serializer.data['employee_media']
+        t1 = threading.Thread(target=face_embedding,args=([storage_path, storeid, empid, video_file,]),daemon=True)
+        t1.start()
+        # face_embedding(storage_path, storeid, empid, video_file)
+        # serializer = EmployeeSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "created successfully"})
+
 
 ##########################################################################
 class StoreListCreate(generics.ListCreateAPIView):
@@ -299,6 +490,7 @@ class AnalyticEntryRetriveUpdateDestroy(APIView):
 
 
 class UserCreate(generics.CreateAPIView):
+    # parser_classes = (MultiPartParser, FormParser, FileUploadParser)
     authentication_classes = ()
     permission_classes = ()
     serializer_class = UserSerializer
@@ -358,6 +550,7 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+###################################################################
 
 from django.core.mail import EmailMultiAlternatives
 from django.dispatch import receiver

@@ -22,7 +22,7 @@ SECRET_KEY = 'bk=g@0ht3onbbi6hus)le%+oqhk0tc_3+mg=tkqt4yyo9tdy-w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['34.66.241.156', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['34.122.179.12', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'camerax',
         'USER': 'datavivai2085',
-        'PASSWORD': 'secure@dataviv123',
+        'PASSWORD': '',
         'HOST': '35.232.103.138',
         # 'PORT': '5432'
     }
@@ -130,8 +130,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-#
-# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# MEDIA_URL = '/embedding/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, "embedding")
 
 AUTH_USER_MODEL = 'camera.User'
 
@@ -147,12 +148,24 @@ AUTH_USER_MODEL = 'camera.User'
 # }
 
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 # in bytes (10MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10 MB
+
+
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+    ),
+
+    'DEFAULT_PARSER_CLASSES': (
+        # 'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FileUploadParser'
     )
 }
 

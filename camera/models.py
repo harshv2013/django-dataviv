@@ -29,9 +29,13 @@ class User(AbstractUser):
 #########################################
 
 
-class TestUser2(models.Model):
-    name = models.CharField(max_length=200)
-    testuser_media = models.FileField()
+# class TestUserb(models.Model):
+#     name = models.CharField(max_length=200)
+#     testuser_media = models.FileField(upload_to='home/harsh/django-dataviv/embedding')
+
+class TestUser(models.Model):
+    media = models.FileField(upload_to=path_and_rename,default = "")
+
     
 #######################################
 
@@ -51,6 +55,24 @@ class StoreManager(User):
         Store, on_delete=models.DO_NOTHING, default=None)
 
 
+# class Employee(models.Model):
+#     GENDER_CHOICES = (
+#         ('M', 'Male'),
+#         ('F', 'Female'),
+#     )
+#     name = models.CharField(max_length=200)
+#     email = models.EmailField(default="")
+#     contact = models.CharField(max_length=200, default="")
+#     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+#     age = models.PositiveIntegerField()
+#     address = models.CharField(max_length=200, default="")
+#     # employee_media = models.FileField(upload_to='Face_data')
+#     # employee_media = models.FileField(upload_to=path_and_rename)
+#     embedding = models.BooleanField(default=False)
+#     store = models.ForeignKey(
+#         Store, related_name='employees', on_delete=models.DO_NOTHING)
+
+
 class Employee(models.Model):
     GENDER_CHOICES = (
         ('M', 'Male'),
@@ -63,9 +85,17 @@ class Employee(models.Model):
     age = models.PositiveIntegerField()
     address = models.CharField(max_length=200, default="")
     # employee_media = models.FileField(upload_to='Face_data')
-    employee_media = models.FileField(upload_to=path_and_rename)
+    employee_media = models.FileField(upload_to=path_and_rename,default="")
+    embedding = models.BooleanField(default=False)
     store = models.ForeignKey(
         Store, related_name='employees', on_delete=models.DO_NOTHING)
+    owner = models.ForeignKey('User', related_name='employees', on_delete=models.DO_NOTHING)
+
+
+class EmployeeMedia(models.Model):
+    employee_media = models.FileField(upload_to=path_and_rename)
+    employee = models.ForeignKey(
+        Employee, related_name='employeemedias', on_delete=models.DO_NOTHING, default=None)
 
 
 class Analytic(models.Model):

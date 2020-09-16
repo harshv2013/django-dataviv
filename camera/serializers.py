@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
-    AnalyticEntry, TestUser2
+    AnalyticEntry, TestUser,EmployeeMedia
 
 
 ########################################################
@@ -14,16 +14,28 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 
 class TestUserSerializer(serializers.ModelSerializer):
+    # media = serializers.FileField()
     class Meta:
-        model = TestUser2
+        model = TestUser
         fields = "__all__"
+        # fields = ["media"]
 
 #########################################################
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Employee
+        # fields = "__all__"
+        fields = ['id', 'name','email', 'contact', 'gender', 'age', 'address', 'employee_media', 'embedding', 'store', 'owner']
+
+# fields = ['id', 'title', 'description', 'body', 'createdAt',
+ #                 'updatedAt', 'favorited', 'favoritesCount', 'owner', 'tags']
+
+class EmployeeMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeMedia
         fields = "__all__"
 ##########################################################
 
