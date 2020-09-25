@@ -25,13 +25,12 @@ class TestUserSerializer(serializers.ModelSerializer):
 
 class EmployeeSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Employee
         # fields = "__all__"
         fields = ['id', 'name','email', 'contact', 'gender', 'age', 'address', 'employee_media', 'embedding', 'store', 'owner']
 
-# fields = ['id', 'title', 'description', 'body', 'createdAt',
- #                 'updatedAt', 'favorited', 'favoritesCount', 'owner', 'tags']
 
 class EmployeeMediaSerializer(serializers.ModelSerializer):
     class Meta:

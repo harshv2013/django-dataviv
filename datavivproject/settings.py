@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'camerax',
         'USER': 'datavivai2085',
-        'PASSWORD': '',
+        'PASSWORD': 'secure@dataviv123',
         'HOST': '35.232.103.138',
         # 'PORT': '5432'
     }
@@ -136,16 +136,22 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 AUTH_USER_MODEL = 'camera.User'
 
-# REST_FRAMEWORK = {
-#     "DEFAULT_AUTHENTICATION_CLASSES": [
-#         "rest_framework.authentication.TokenAuthentication",
-#         "rest_framework.authentication.SessionAuthentication",
-#     ],
-#     "DEFAULT_PERMISSION_CLASSES": [
-#         "rest_framework.permissions.IsAuthenticated",
-#         "rest_framework.permissions.DjangoModelPermissions",
-#     ],
-# }
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.DjangoModelPermissions",
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FileUploadParser'
+    )
+}
 
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 # in bytes (10MB)
@@ -153,21 +159,21 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10 MB
 
 
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-    ),
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.TokenAuthentication',
+#     ),
 
-    'DEFAULT_PARSER_CLASSES': (
-        # 'rest_framework_json_api.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',
-        'rest_framework.parsers.FileUploadParser'
-    )
-}
+#     'DEFAULT_PARSER_CLASSES': (
+#         # 'rest_framework_json_api.parsers.JSONParser',
+#         'rest_framework.parsers.FormParser',
+#         'rest_framework.parsers.MultiPartParser',
+#         'rest_framework.parsers.FileUploadParser'
+#     )
+# }
 
 
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # time in hours about how long the token is active (Default: 24)

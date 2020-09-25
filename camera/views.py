@@ -90,15 +90,17 @@ class TestUserRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 
 class EmployeeListCreate(APIView):
-    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
     """
     List all snippets, or create a new snippet.
     """
     def get(self, request, format=None):
 
         print('in get list ------',request.query_params.get('pk', None))
-        employee = Employee.objects.all()
+        print('request user is -------------------------- ', self.request.user)
+        # employee = Employee.objects.all()
+        employee = Employee.objects.filter(owner=self.request.user).all()
         serializer = EmployeeSerializer(employee, many=True)
         return Response(serializer.data)
 
