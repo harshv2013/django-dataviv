@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
-    AnalyticEntry, TestUser,EmployeeMedia
+    AnalyticEntry, TestUser, EmployeeMedia, Attendence, \
+    AttendenceMedia, Analysis1, Analysis2, ModelAnalysis
+    
 
 
 ########################################################
@@ -35,6 +37,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
 class EmployeeMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeMedia
+        fields = "__all__"
+##########################################################
+
+
+class AttendenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attendence
+        fields = "__all__"
+##########################################################
+
+
+class AttendenceMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendenceMedia
         fields = "__all__"
 ##########################################################
 
@@ -104,3 +120,53 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+################################################################
+
+class Analysis1Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analysis1
+        fields = "__all__"
+
+
+class Analysis2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analysis2
+        fields = "__all__"
+
+################################################################
+
+
+class ModelAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ModelAnalysis
+        fields = "__all__"
+
+################################################################
+
+
+class ModelAnalysisSerializer2(serializers.ModelSerializer):
+    timestamp = serializers.DateTimeField(format="%H:%M:%S")
+
+    class Meta:
+        model = ModelAnalysis
+        # fields = "__all__"
+        fields = ['id', 'img_url', 'classtype', 'updatedclasstype', 'flag', 'store','timestamp']
+
+#######################################################################################################
+
+# class ModelAnalysisTimeSerializer(serializers.ModelSerializer):
+#     timeinhms = 
+
+#     class Meta:
+#         model = ModelAnalysis
+#         fields = ['timestamp', 'timeinhms']
+
+
+# class ModelAnalysisSerializer3(serializers.ModelSerializer):
+#     timeinhms = serializers.DateTimeField(ModelAnalysisSerializer('timestamp'),format="%H:%M:%S")
+
+#     class Meta:
+#         model = ModelAnalysis
+#         # fields = "__all__"
+#         fields = ['id', 'img_url', 'classtype', 'updatedclasstype', 'flag', 'store','timestamp','timeinhms']
+#         read_only_fields = ['timeinhms']

@@ -18,6 +18,19 @@ def path_and_rename(instance, filename):
     return os.path.join(upload_to, filename)
 
 
+def path_and_rename2(instance, filename):
+    upload_to = 'Attendence_data'
+    ext = filename.split('.')[-1]
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid4().hex, ext)
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
+
+
 class Organization(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
@@ -90,6 +103,17 @@ class Employee(models.Model):
     store = models.ForeignKey(
         Store, related_name='employees', on_delete=models.DO_NOTHING)
     owner = models.ForeignKey('User', related_name='employees', on_delete=models.DO_NOTHING)
+
+
+class Attendence(models.Model):
+    employee = models.ForeignKey(
+        Employee, related_name='attendences', on_delete=models.DO_NOTHING, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class AttendenceMedia(models.Model):
+    attendence_media = models.FileField(upload_to=path_and_rename2)
 
 
 class EmployeeMedia(models.Model):
@@ -177,3 +201,42 @@ class AnalyticEntry(models.Model):
     DateTime = models.DateTimeField(auto_now=True)
     store = models.ForeignKey(
         Store, related_name='analyticentrys', on_delete=models.DO_NOTHING)
+
+
+class Analysis1(models.Model):
+    avg_male_count = models.PositiveIntegerField()
+    avg_female_count = models.PositiveIntegerField()
+    age_child = models.PositiveIntegerField()
+    age_teenge = models.PositiveIntegerField()
+    age_adult = models.PositiveIntegerField()
+    age_old = models.PositiveIntegerField()
+    total_in = models.PositiveIntegerField()
+    total_out = models.PositiveIntegerField()
+    customer_walkin = models.PositiveIntegerField()
+    timestamp = models.DateTimeField()
+    store = models.ForeignKey(
+        Store, related_name='analysis1s', on_delete=models.DO_NOTHING)
+
+
+class Analysis2(models.Model):
+    avg_purchased_visit = models.PositiveIntegerField()
+    avg_linelength = models.PositiveIntegerField()
+    timestamp = models.DateTimeField()
+    store = models.ForeignKey(
+        Store, related_name='analysis2s', on_delete=models.DO_NOTHING)
+
+
+class ModelAnalysis(models.Model):
+    CLASSTYPE_CHOICES = (
+        ('E', 'Employee'),
+        ('C', 'Customer'),
+        ('O', 'Other')
+    )
+    img_url = models.TextField()
+    timestamp = models.DateTimeField()
+    classtype = models.CharField(max_length=1, default=None)
+    updatedclasstype = models.CharField(max_length=1, choices=CLASSTYPE_CHOICES, null=True, default=None)
+    flag = models.BooleanField(default=False)
+    store = models.ForeignKey(
+        Store, related_name='modelanalysiss', on_delete=models.DO_NOTHING)
+    

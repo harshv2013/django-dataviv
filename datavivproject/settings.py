@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'camerax',
         'USER': 'datavivai2085',
-        'PASSWORD': 'secure@dataviv123',
+        'PASSWORD': '',
         'HOST': '35.232.103.138',
         # 'PORT': '5432'
     }
@@ -143,7 +143,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
-        "rest_framework.permissions.DjangoModelPermissions",
+        # "rest_framework.permissions.DjangoModelPermissions",
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
@@ -154,8 +154,9 @@ REST_FRAMEWORK = {
 }
 
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 # in bytes (10MB)
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 26214400 # in bytes (25MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400 # 25 MB
+
 
 
 

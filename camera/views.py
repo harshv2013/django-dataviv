@@ -1,6 +1,8 @@
 from django.core import mail
 connection = mail.get_connection()
 import threading
+from datetime import datetime
+from collections import Counter
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser, FileUploadParser
 from django.contrib.auth import authenticate
 # from django.contrib.auth.models import User
@@ -14,14 +16,23 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.authtoken.models import Token
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
-    AnalyticEntry, TestUser, EmployeeMedia
+    AnalyticEntry, TestUser, EmployeeMedia, Attendence, \
+    Analysis1, Analysis2,ModelAnalysis
 from camera.permissions import IsOwnerOrReadOnly
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from camera.serializers import EmployeeSerializer, \
     UserSerializer, OrganizationSerializer, StoreSerializer, \
     AnalyticSerializer, AnalyticDisplaySerializer, TotalDisplaySerializer, \
-    ClientSerializer, AnalyticEntrySerializer, TestUserSerializer, EmployeeMediaSerializer
+    ClientSerializer, AnalyticEntrySerializer, TestUserSerializer, \
+    EmployeeMediaSerializer, AttendenceSerializer, AttendenceMediaSerializer, \
+    Analysis1Serializer, Analysis2Serializer, ModelAnalysisSerializer, \
+    ModelAnalysisSerializer2
+    # ModelAnalysisSerializer3
+    
 
 from camera.encode_faces import face_embedding
+from camera.recognize_faces_image import get_box, recognize_face,url_to_image
+
 
 
 
@@ -599,3 +610,346 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     )
     msg.attach_alternative(email_html_message, "text/html")
     msg.send()
+
+
+#############################################################################################
+
+
+
+class AttendenceListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        attendence = Attendence.objects.all()
+        serializer = AttendenceSerializer(attendence, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        data=request.data
+        print('in attendence post request-------------', data)
+        # print('in attendence post request-------------', data["store_id"])
+        # print('in attendence post reques boxes is -------------', data["box"])
+
+        serializer = AttendenceMediaSerializer(data=request.data)
+        # serializer = AttendenceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            attendence_media = serializer.data['attendence_media']
+            print('---------------------------attendence media------------', attendence_media)
+            image = url_to_image(attendence_media)
+            boxes = get_box(image)
+            print('boxes is -------------', boxes)
+            store_id = data["store_id"]
+            pik = str(store_id)+".pickle"
+            # storage_path = "embedding/9/9.pickle"
+            storage_path = "embedding/"+str(store_id)+"/"+pik
+            # storage_path = "/home/harsh/django-dataviv/embedding/9/9.pickle"
+            empid= recognize_face(storage_path, image, boxes)
+            print('employee id is -----------------',empid)
+            if empid != "Unknown":
+                employee = Employee.objects.get(id = empid)
+                print('employee is ---------------------',employee)
+                a = Attendence.objects.create(employee=employee)
+                print('attendence created object is -----------------------',a)
+                print('attendence created object dictionary  is---------------------- ',a)
+                return Response({"message":"Attendence proceeded"}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"message":"Employee does not exit !"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # f = open("embedding/myfile.txt", "w")
+            # f.write("Now the file has more content for attendence2!")
+            # f.close()
+            # storage_path = "embedding"
+            # storeid = serializer.data['store']
+            # empid = serializer.data['id']
+            # video_file = serializer.data['employee_media']
+            # t1 = threading.Thread(target=face_embedding,args=([storage_path, storeid, empid, video_file,]),daemon=True)
+            # t1.start()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AttendenceRetriveUpdateDestroy(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Attendence.objects.get(pk=pk)
+        except Attendence.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        print('pk-------------',pk)
+        attendence = self.get_object(pk)
+        serializer = AttendenceSerializer(attendence)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        attendence = self.get_object(pk)
+        serializer = AttendenceSerializer(attendence, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        attendence = self.get_object(pk)
+        serializer = AttendenceSerializer(attendence, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        attendence = self.get_object(pk)
+        attendence.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+###########################################################################
+class Analysis1ListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        analysis1 = Analysis1.objects.all()
+        serializer = Analysis1Serializer(analysis1, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = Analysis1Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Analysis1RetriveUpdateDestroy(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Analysis1.objects.get(pk=pk)
+        except Analysis1.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        print('pk-------------',pk)
+        analysis1 = self.get_object(pk)
+        serializer = Analysis1Serializer(analysis1)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        analysis1 = self.get_object(pk)
+        serializer = Analysis1Serializer(analysis1, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        analysis1 = self.get_object(pk)
+        serializer = Analysis1Serializer(analysis1, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        analysis1 = self.get_object(pk)
+        analysis1.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+################################################################################
+
+class Analysis2ListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        analysis2 = Analysis2.objects.all()
+        serializer = Analysis2Serializer(analysis2, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = Analysis2Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Analysis2RetriveUpdateDestroy(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Analysis2.objects.get(pk=pk)
+        except Analysis2.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        print('pk-------------',pk)
+        analysis2 = self.get_object(pk)
+        serializer = Analysis2Serializer(analysis2)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        analysis2 = self.get_object(pk)
+        serializer = Analysis2Serializer(analysis2, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        analysis2 = self.get_object(pk)
+        serializer = Analysis2Serializer(analysis2, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        analysis2 = self.get_object(pk)
+        analysis2.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+###########################################################################
+class ModelAnalysisListCreate(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        dt = request.query_params.get('dt', None)
+
+
+        # data = request.data
+        # dt = data['dt']
+        # print('request data in model analysis get list is ---------', request.data)
+        print('dt is ------************----',dt)
+        dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        # print('in get list ------', request.query_params.get('pk', None))
+        # modelanalysis = ModelAnalysis.objects.all()
+        modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt)
+        serializer = ModelAnalysisSerializer2(modelanalysis, many=True)
+        print('serializer data is ----------------',len(serializer.data))
+        if len(serializer.data) !=0:
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"No result found"},status=status.HTTP_204_NO_CONTENT )
+
+
+    def post(self, request, format=None):
+        serializer = ModelAnalysisSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ModelAnalysisRetriveUpdateDestroy(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return ModelAnalysis.objects.get(pk=pk)
+        except ModelAnalysis.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        print('pk-------------',pk)
+        modelanalysis = self.get_object(pk)
+        serializer = ModelAnalysisSerializer(modelanalysis)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        modelanalysis = self.get_object(pk)
+        serializer = ModelAnalysisSerializer(modelanalysis, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        modelanalysis = self.get_object(pk)
+        serializer = ModelAnalysisSerializer(modelanalysis, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        modelanalysis = self.get_object(pk)
+        modelanalysis.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+############################################################################
+class AnalyticData(APIView):
+    def get(self, request, format=None):
+        data = request.data
+        try:
+            print('requested data  is-----------',request.data)
+            dt = request.query_params.get('dt', None)
+            hr = request.query_params.get('hr', None)
+            # dt = data.get('dt',None)
+            # hr = data.get('hr',None)
+            print('hr is -----',hr)
+            print('date and hour is----------', dt,hr)
+            dt = datetime.strptime(dt, '%Y-%m-%d').date()
+            hr = datetime.strptime(hr,'%H:%M:%S').time()
+            hr = hr.hour
+            print('date is -------',dt)
+            print('hr is ---------------*******************',hr)
+            # a1 = Analysis1.objects.filter(timestamp__date=dt,timestamp__hour=hr)
+            # a2 = Analysis2.objects.filter(timestamp__date=dt,timestamp__hour=hr)
+            a1 = Analysis1.objects.filter(timestamp__date=dt,timestamp__hour=hr)
+            a2 = Analysis2.objects.filter(timestamp__date=dt,timestamp__hour=hr)
+            print('length of query------',len(a1))
+            keys = ["_state","id","timestamp","store_id"]
+            l = [ i.__dict__ for i in a1]
+            m = [ j.__dict__ for j in a2]
+            l2 = []
+            m2 = []
+            print('l is ------', l)
+            print('m is --------',m)
+            for x in l:
+                list(map(x.pop, keys))
+                l2.append(Counter(x))
+
+            for x in m:
+                list(map(x.pop, keys))
+                m2.append(Counter(x))
+
+            for i in range(1,len(l2)):
+                l2[i] = l2[i]+l2[i-1]
+            res1 = l2[-1]
+
+            for j in range(1,len(m2)):
+                m2[j] = m2[j]+m2[j-1]
+            res2 = m2[-1]
+
+            print('res1 is ------',res1)
+            print('res2 is ----',res2)
+            res3 = res1 + res2
+            print('res3 is ---------',res3)
+
+            # return Response({"message":"Got it"})
+            return Response(res3,status=status.HTTP_200_OK)   
+
+        except:
+            return Response({"message":"No result found"},status=status.HTTP_204_NO_CONTENT )

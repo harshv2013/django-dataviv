@@ -79,4 +79,4 @@ def see_embeding(filename):
 	pickle_in.close()
 	print(data)
 
-see_embeding('/home/harsh/django-dataviv/embedding/1/1.pickle')
+see_embeding('/home/harsh/django-dataviv/embedding/9/9.pickle')
