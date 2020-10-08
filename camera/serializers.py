@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from datetime import datetime
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
     AnalyticEntry, TestUser, EmployeeMedia, Attendence, \
@@ -33,6 +34,77 @@ class EmployeeSerializer(serializers.ModelSerializer):
         # fields = "__all__"
         fields = ['id', 'name','email', 'contact', 'gender', 'age', 'address', 'employee_media', 'embedding', 'store', 'owner']
 
+class AttendenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attendence
+        fields = "__all__"
+
+class AttendenceSerializer2(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%H:%M:%S")
+    date_at = serializers.SerializerMethodField(method_name='get_date')
+    # date_at = serializers.DateTimeField(format="%H:%M:%S")
+    class Meta:
+        model = Attendence
+        fields = ['id', 'created_at', 'date_at']
+
+    def get_date(self, instance):
+        data_at = instance.created_at.date()
+        # data_at = instance.get(created_at.date==dt)
+        # dt = "2020-10-08"
+        # dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        # date_at = instance.objects.filter(created_at.date==dt)
+
+        # if obj.get("product_id"):
+        #     obj_product = Product.objects.filter(id=obj.get("product_id")).first()
+        # request = self.context.get('request')
+        # user = request.user
+        # if user.is_authenticated() and user.is_staff:
+        #     return datetime.datetime.now().year - instance.dob.year
+        return data_at
+
+
+class EmployeeSerializer2(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    attendences = AttendenceSerializer2(many=True, read_only=True)
+
+    class Meta:
+        model = Employee
+        # fields = "__all__"
+        fields = ['id', 'name','email', 'contact', 'gender', 'age', 'address', 'employee_media', 'embedding', 'store', 'owner', 'attendences']
+
+
+class EmployeeSerializer3(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    # attendences = AttendenceSerializer2(many=True, read_only=True)
+
+    attendences = serializers.SerializerMethodField('get_attendences')
+
+    def get_attendences(self, obj):
+        # dt = self.request.query_params.get('dt', None)
+        dt = self.context.get('dt',None)
+        print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',dt)
+        # dt = "2020-10-08"
+        # dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        # date_at = instance.objects.filter(created_at.date==dt)
+        if dt:
+            attendences = AttendenceSerializer2(Attendence.objects.filter(employee=obj).filter(created_at__date=dt),many=True).data
+        else:
+            attendences = AttendenceSerializer2(Attendence.objects.filter(employee=obj),many=True).data
+
+        return attendences
+
+        # StudentSerializer(
+        #             Student.objects.filter(college_id=self.college_id),
+        #             many=True
+        #         ).data
+
+
+    class Meta:
+        model = Employee
+        # fields = "__all__"
+        fields = ['id', 'name','email', 'contact', 'gender', 'age', 'address', 'employee_media', 'embedding', 'store', 'owner', 'attendences']
+
+
 
 class EmployeeMediaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,10 +113,10 @@ class EmployeeMediaSerializer(serializers.ModelSerializer):
 ##########################################################
 
 
-class AttendenceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attendence
-        fields = "__all__"
+# class AttendenceSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Attendence
+#         fields = "__all__"
 ##########################################################
 
 
@@ -162,11 +234,15 @@ class ModelAnalysisSerializer2(serializers.ModelSerializer):
 #         fields = ['timestamp', 'timeinhms']
 
 
-# class ModelAnalysisSerializer3(serializers.ModelSerializer):
-#     timeinhms = serializers.DateTimeField(ModelAnalysisSerializer('timestamp'),format="%H:%M:%S")
+class ModelAnalysisSerializer3(serializers.ModelSerializer):
+    timeinhms = serializers.SerializerMethodField() #Custom serializer method
 
-#     class Meta:
-#         model = ModelAnalysis
-#         # fields = "__all__"
-#         fields = ['id', 'img_url', 'classtype', 'updatedclasstype', 'flag', 'store','timestamp','timeinhms']
-#         read_only_fields = ['timeinhms']
+    def get_timeinhms(self, obj):
+        timeinhms = obj.timestamp.time()
+        return timeinhms
+
+    class Meta:
+        model = ModelAnalysis
+        # fields = "__all__"
+        fields = ['id', 'img_url', 'classtype', 'updatedclasstype', 'flag', 'store','timestamp','timeinhms']
+        # read_only_fields = ['timeinhms']

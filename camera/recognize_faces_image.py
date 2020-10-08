@@ -40,6 +40,7 @@ def recognize_face(storage_embedding_path,image,boxes):
 	rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 	print(rgb.shape)
 	print("[INFO] recognizing faces...")
+	print('boxes is recogn face func is --------------',boxes)
 	encodings = face_recognition.face_encodings(rgb, boxes)
 
 	# initialize the list of names for each face detected

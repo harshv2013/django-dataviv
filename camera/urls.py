@@ -14,7 +14,7 @@ from .views import index, \
     ClientListCreate, ClientRetriveUpdateDestroy, \
     AnalyticEntryListCreate, AnalyticEntryRetriveUpdateDestroy,\
     TestUserListCreate, TestUserRetriveUpdateDestroy, \
-    EmployeeMediaListCreate, AttendenceListCreate, \
+    EmployeeMediaListCreate, AttendenceListCreate, AttendenceListCreate2,\
     AttendenceRetriveUpdateDestroy, \
     Analysis1ListCreate, Analysis1RetriveUpdateDestroy, \
     Analysis2ListCreate, Analysis2RetriveUpdateDestroy, \
@@ -47,6 +47,7 @@ urlpatterns = [
     path('employee/<int:pk>', EmployeeRetriveUpdateDestroy.as_view(), name='employee-detail'),
 
     path('attendence/', AttendenceListCreate.as_view(), name='attendence-list'),
+    path('attendence2/', AttendenceListCreate2.as_view(), name='attendence-list'),
     path('attendence/<int:pk>', AttendenceRetriveUpdateDestroy.as_view(), name='attendence-detail'),
 
     path('store/', StoreListCreate.as_view(), name='store-list'),

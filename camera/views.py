@@ -26,8 +26,8 @@ from camera.serializers import EmployeeSerializer, \
     ClientSerializer, AnalyticEntrySerializer, TestUserSerializer, \
     EmployeeMediaSerializer, AttendenceSerializer, AttendenceMediaSerializer, \
     Analysis1Serializer, Analysis2Serializer, ModelAnalysisSerializer, \
-    ModelAnalysisSerializer2
-    # ModelAnalysisSerializer3
+    ModelAnalysisSerializer2, ModelAnalysisSerializer3, \
+    EmployeeSerializer2,  EmployeeSerializer3
     
 
 from camera.encode_faces import face_embedding
@@ -255,9 +255,20 @@ class EmployeeRetriveUpdateDestroy(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
+        print('in get date dt is  ------', request.query_params.get('dt', None))
         print('pk-------------',pk)
-        employee = self.get_object(pk)
-        serializer = EmployeeSerializer(employee)
+        # dt = "2020-10-08"
+        dt = request.query_params.get('dt', None)
+        if dt:
+            dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        context={'dt':dt}
+        print('context is ---------------------################### ---------',context)
+        e = Employee.objects.get(pk=pk)
+        # e = e.filter(e.attendences.created_at.date==dt
+        # e = employee.attendences.filter(created_at__date=dt).all()
+        
+        # employee = self.get_object(pk)
+        serializer = EmployeeSerializer3(e,context=context)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
@@ -427,7 +438,7 @@ class ClientRetriveUpdateDestroy(APIView):
 
     def patch(self, request, pk, format=None):
         client = self.get_object(pk)
-        serializer = ClientSerializer(client, data=request.data)
+        serializer = ClientSerializer(client, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -488,7 +499,7 @@ class AnalyticEntryRetriveUpdateDestroy(APIView):
 
     def patch(self, request, pk, format=None):
         analyticentry = self.get_object(pk)
-        serializer = AnalyticEntrySerializer(analyticentry, data=request.data)
+        serializer = AnalyticEntrySerializer(analyticentry, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -616,7 +627,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
 
 
-class AttendenceListCreate(APIView):
+class AttendenceListCreate2(APIView):
     """
     List all snippets, or create a new snippet.
     """
@@ -638,7 +649,7 @@ class AttendenceListCreate(APIView):
         if serializer.is_valid():
             serializer.save()
             attendence_media = serializer.data['attendence_media']
-            print('---------------------------attendence media------------', attendence_media)
+            print('---------------------------attendence media- is    -----------', attendence_media)
             image = url_to_image(attendence_media)
             boxes = get_box(image)
             print('boxes is -------------', boxes)
@@ -671,6 +682,51 @@ class AttendenceListCreate(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+##########################################################################################
+class AttendenceListCreate(APIView):
+    parser_classes = (JSONParser,)
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+
+        print('in get list ------', request.query_params.get('pk', None))
+        attendence = Attendence.objects.all()
+        serializer = AttendenceSerializer(attendence, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        data=request.data
+        print('in attendence post request-------------', data)
+        image_url = data['image_url']
+        # boxes = data['boxes']
+        store_id = data['store_id']
+        image = url_to_image(image_url)
+        # boxes = get_box(image)
+        boxes = [tuple(data['bound'])]
+        print('box from request-----',boxes,type(boxes))
+        # boxes = [(442, 802, 1173, 72)]
+        # print('boxes hardcoded-----',boxes,type(boxes))
+        print('data recived ---------',image_url,boxes,store_id)
+        print('image is ----$$$$$$$$$$$$$$$$$$$$$$',image)
+        pik = str(store_id)+".pickle"
+        # storage_path = "embedding/9/9.pickle"
+        storage_path = "embedding/"+str(store_id)+"/"+pik
+        # storage_path = "/home/harsh/django-dataviv/embedding/9/9.pickle"
+        empid= recognize_face(storage_path, image, boxes)
+        print('employee id is -----------------',empid)
+        if empid != "Unknown":
+            employee = Employee.objects.get(id = empid)
+            print('employee is ---------------------',employee)
+            a = Attendence.objects.create(employee=employee)
+            print('attendence created object is -----------------------',a)
+            print('attendence created object dictionary  is---------------------- ',a)
+            return Response({"message":"Attendence proceeded"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message":"Employee does not exit !"}, status=status.HTTP_400_BAD_REQUEST)
+
+##########################################################################################
+
 
 class AttendenceRetriveUpdateDestroy(APIView):
     """
@@ -698,7 +754,7 @@ class AttendenceRetriveUpdateDestroy(APIView):
 
     def patch(self, request, pk, format=None):
         attendence = self.get_object(pk)
-        serializer = AttendenceSerializer(attendence, data=request.data)
+        serializer = AttendenceSerializer(attendence, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -756,7 +812,7 @@ class Analysis1RetriveUpdateDestroy(APIView):
 
     def patch(self, request, pk, format=None):
         analysis1 = self.get_object(pk)
-        serializer = Analysis1Serializer(analysis1, data=request.data)
+        serializer = Analysis1Serializer(analysis1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -814,7 +870,7 @@ class Analysis2RetriveUpdateDestroy(APIView):
 
     def patch(self, request, pk, format=None):
         analysis2 = self.get_object(pk)
-        serializer = Analysis2Serializer(analysis2, data=request.data)
+        serializer = Analysis2Serializer(analysis2, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -835,21 +891,24 @@ class ModelAnalysisListCreate(APIView):
 
         dt = request.query_params.get('dt', None)
 
-
-        # data = request.data
-        # dt = data['dt']
-        # print('request data in model analysis get list is ---------', request.data)
-        print('dt is ------************----',dt)
-        dt = datetime.strptime(dt, '%Y-%m-%d').date()
-        # print('in get list ------', request.query_params.get('pk', None))
-        # modelanalysis = ModelAnalysis.objects.all()
-        modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt)
-        serializer = ModelAnalysisSerializer2(modelanalysis, many=True)
-        print('serializer data is ----------------',len(serializer.data))
-        if len(serializer.data) !=0:
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        else:
-            return Response({"message":"No result found"},status=status.HTTP_204_NO_CONTENT )
+        try:
+            # data = request.data
+            # dt = data['dt']
+            # print('request data in model analysis get list is ---------', request.data)
+            print('dt is ------************----',dt)
+            dt = datetime.strptime(dt, '%Y-%m-%d').date()
+            # print('in get list ------', request.query_params.get('pk', None))
+            # modelanalysis = ModelAnalysis.objects.all()
+            modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt)
+            serializer = ModelAnalysisSerializer2(modelanalysis, many=True)
+            print('serializer data is ----------------',len(serializer.data))
+            if len(serializer.data) :
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            else:
+                return Response({"message":"No result found"},status=status.HTTP_204_NO_CONTENT )
+        
+        except:
+            return Response({"message":"Provide valid date"},status=status.HTTP_400_BAD_REQUEST )
 
 
     def post(self, request, format=None):
@@ -874,9 +933,11 @@ class ModelAnalysisRetriveUpdateDestroy(APIView):
         print('pk-------------',pk)
         modelanalysis = self.get_object(pk)
         serializer = ModelAnalysisSerializer(modelanalysis)
+        print('serializer modelanalysis-----------',serializer.data)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
+        print('in put method ----------')
         modelanalysis = self.get_object(pk)
         serializer = ModelAnalysisSerializer(modelanalysis, data=request.data)
         if serializer.is_valid():
@@ -885,8 +946,9 @@ class ModelAnalysisRetriveUpdateDestroy(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk, format=None):
+        print('in patch method ---------------',pk, request.data)
         modelanalysis = self.get_object(pk)
-        serializer = ModelAnalysisSerializer(modelanalysis, data=request.data)
+        serializer = ModelAnalysisSerializer(modelanalysis, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -919,33 +981,101 @@ class AnalyticData(APIView):
             # a2 = Analysis2.objects.filter(timestamp__date=dt,timestamp__hour=hr)
             a1 = Analysis1.objects.filter(timestamp__date=dt,timestamp__hour=hr)
             a2 = Analysis2.objects.filter(timestamp__date=dt,timestamp__hour=hr)
-            print('length of query------',len(a1))
+            print('a1 dict ---------',a1.__dict__)
+            print('a2 dict ---------',a2.__dict__)
+            print('length of query- a1-----',len(a1))
+            print('length of query- a2-----',len(a2))
             keys = ["_state","id","timestamp","store_id"]
-            l = [ i.__dict__ for i in a1]
-            m = [ j.__dict__ for j in a2]
-            l2 = []
-            m2 = []
-            print('l is ------', l)
-            print('m is --------',m)
-            for x in l:
-                list(map(x.pop, keys))
-                l2.append(Counter(x))
+            if len(a1):
+                print('bbbbbbbbbbbbbbbbb---------')
+                l = [ i.__dict__ for i in a1]
+                l2 = []
 
-            for x in m:
-                list(map(x.pop, keys))
-                m2.append(Counter(x))
+                for x in l:
+                    list(map(x.pop, keys))
+                    l2.append(Counter(x))
 
-            for i in range(1,len(l2)):
-                l2[i] = l2[i]+l2[i-1]
-            res1 = l2[-1]
+                for i in range(1,len(l2)):
+                    l2[i] = l2[i]+l2[i-1]
+                res1 = l2[-1]
 
-            for j in range(1,len(m2)):
-                m2[j] = m2[j]+m2[j-1]
-            res2 = m2[-1]
+            else:
+                print('no res for a1 $$$$$$$$$$$$$$$$$$$$')
+                res1 = Counter({
+                    "avg_male_count":0,
+                    "avg_female_count":0,
+                    "age_child":0,
+                    "age_teenge":0,
+                    "age_adult":0,
+                    "age_old":0,
+                    "total_in":0,
+                    "total_out":0,
+                    "customer_walkin":0
+                })
+            
+            if len(a2): 
+                print('hhaaaa-------------')
+                m = [j.__dict__ for j in a2]
+                m2 = []
 
-            print('res1 is ------',res1)
-            print('res2 is ----',res2)
-            res3 = res1 + res2
+                for x in m:
+                    list(map(x.pop, keys))
+                    m2.append(Counter(x))
+
+                for j in range(1,len(m2)):
+                    m2[j] = m2[j]+m2[j-1]
+                res2 = m2[-1]
+                print('res2 is *****************',res2)
+            else:
+                print('no result for a2 #################')
+                res2 = Counter({
+                    "avg_purchased_visit":0,
+                    "avg_linelength":0
+                })
+
+
+            # print('l is ------', l)
+            # print('m is --------',m)
+
+            # def remove_dictitem(l):
+            #     l2 = []
+            #     for x in l:
+            #         list(map(x.pop, keys))
+            #         l2.append(Counter(x))
+
+            #     for i in range(1,len(l2)):
+            #         l2[i] = l2[i]+l2[i-1]
+            #     res1 = l2[-1]
+
+            #     return res1
+
+            # res1 = remove_dictitem(l)
+            # res2 = remove_dictitem(m)
+
+
+            # for x in l:
+            #     list(map(x.pop, keys))
+            #     l2.append(Counter(x))
+
+            # for i in range(1,len(l2)):
+            #     l2[i] = l2[i]+l2[i-1]
+            # res1 = l2[-1]
+
+            # for x in m:
+            #     list(map(x.pop, keys))
+            #     m2.append(Counter(x))
+
+            # for j in range(1,len(m2)):
+            #     m2[j] = m2[j]+m2[j-1]
+            # res2 = m2[-1]
+
+
+            print('res1 is ---&&&&&&&************&&&&&&---',dict(res1))
+            print('res2 is --&&&&&&&&************&&&&&&&&&--',dict(res2))
+            res1 = dict(res1)
+            res2 = dict(res2)
+            res3 = {**res1, **res2}
+            # res3 = res.update(dict(res2))
             print('res3 is ---------',res3)
 
             # return Response({"message":"Got it"})

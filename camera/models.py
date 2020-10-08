@@ -104,12 +104,19 @@ class Employee(models.Model):
         Store, related_name='employees', on_delete=models.DO_NOTHING)
     owner = models.ForeignKey('User', related_name='employees', on_delete=models.DO_NOTHING)
 
+# import pytz
+# tz = pytz.timezone("Asia/Calcutta")
+# from datetime import datetime as dt
+# # import datetime.datetime as dt
+# dt.now(tz)
+
 
 class Attendence(models.Model):
     employee = models.ForeignKey(
         Employee, related_name='attendences', on_delete=models.DO_NOTHING, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 
 class AttendenceMedia(models.Model):
