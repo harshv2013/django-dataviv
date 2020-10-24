@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'camerax',
         'USER': 'datavivai2085',
-        'PASSWORD': 'secure@dataviv123',
+        'PASSWORD': '',
         'HOST': '35.232.103.138',
         # 'PORT': '5432'
     }
@@ -194,5 +194,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'vedant.dataviv@gmail.com'
-EMAIL_HOST_PASSWORD = 'Dataviv@123'
+EMAIL_HOST_PASSWORD = ''
 
