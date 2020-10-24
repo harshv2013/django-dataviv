@@ -3,7 +3,8 @@ from datetime import datetime
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
     AnalyticEntry, TestUser, EmployeeMedia, Attendence, \
-    AttendenceMedia, Analysis1, Analysis2, ModelAnalysis
+    AttendenceMedia, Analysis1, Analysis2, ModelAnalysis, \
+    StoreImage
     
 
 
@@ -33,6 +34,35 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         # fields = "__all__"
         fields = ['id', 'name','email', 'contact', 'gender', 'age', 'address', 'employee_media', 'embedding', 'store', 'owner']
+
+
+class EmployeeAttendenceSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    attendences = serializers.SerializerMethodField('get_attendences')
+
+    def get_attendences(self, obj):
+        # dt = self.request.query_params.get('dt', None)
+        dt = self.context.get('dt',None)
+        print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',dt)
+        # dt = "2020-10-08"
+        # dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        # date_at = instance.objects.filter(created_at.date==dt)
+        if dt:
+            attendences = AttendenceSerializer2(Attendence.objects.filter(employee=obj).filter(created_at__date=dt),many=True).data
+        else:
+            attendences = AttendenceSerializer2(Attendence.objects.filter(employee=obj),many=True).data
+
+        return attendences
+
+
+    class Meta:
+        model = Employee
+        # fields = "__all__"
+        fields = ['id', 'name', 'store', 'owner', 'attendences']
+###############################################
+
+###############################################
+
 
 class AttendenceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -163,12 +193,19 @@ class AnalyticEntrySerializer(serializers.ModelSerializer):
 
 ##########################################################
 
-
-class StoreSerializer(serializers.ModelSerializer):
+class StoreImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Store
+        model = StoreImage
         fields = "__all__"
 
+
+class StoreSerializer(serializers.ModelSerializer):
+    storeimage = StoreImageSerializer()
+    class Meta:
+        model = Store
+        # fields = "__all__"
+        fields = ["id", "location", "total_camera", "outer_camera_channel_no", 
+                  "billing_camera_channel_no", "camera_sequence" , "organization","storeimage" ]
 
 ###########################################################
 class UserSerializer(serializers.ModelSerializer):

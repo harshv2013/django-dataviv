@@ -17,7 +17,7 @@ from rest_framework.authtoken.models import Token
 from camera.models import Employee, Organization, Store, User, \
     Analytic, AnalyticDisplay, TotalDisplay, Client, \
     AnalyticEntry, TestUser, EmployeeMedia, Attendence, \
-    Analysis1, Analysis2,ModelAnalysis
+    Analysis1, Analysis2,ModelAnalysis, StoreImage
 from camera.permissions import IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from camera.serializers import EmployeeSerializer, \
@@ -27,7 +27,8 @@ from camera.serializers import EmployeeSerializer, \
     EmployeeMediaSerializer, AttendenceSerializer, AttendenceMediaSerializer, \
     Analysis1Serializer, Analysis2Serializer, ModelAnalysisSerializer, \
     ModelAnalysisSerializer2, ModelAnalysisSerializer3, \
-    EmployeeSerializer2,  EmployeeSerializer3
+    EmployeeSerializer2,  EmployeeSerializer3, EmployeeAttendenceSerializer, \
+    StoreImageSerializer
     
 
 from camera.encode_faces import face_embedding
@@ -352,7 +353,18 @@ class StoreRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
 
-#####
+class StoreImageListCreate(generics.ListCreateAPIView):
+    queryset = StoreImage.objects.all()
+    serializer_class = StoreImageSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+
+class StoreImageRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = StoreImage.objects.all()
+    serializer_class = StoreImageSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+####
 
 ##########################################################################
 
@@ -633,7 +645,7 @@ class AttendenceListCreate2(APIView):
     """
     def get(self, request, format=None):
 
-        print('in get list ------', request.query_params.get('pk', None))
+        print('in get list  blaaaaaaaaaa------', request.query_params.get('pk', None))
         attendence = Attendence.objects.all()
         serializer = AttendenceSerializer(attendence, many=True)
         return Response(serializer.data)
@@ -681,6 +693,37 @@ class AttendenceListCreate2(APIView):
             # t1.start()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#########################################################################################
+class AttendenceList3(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+        print('request user is is -------------------------- ', self.request.user)
+        # employee = Employee.objects.all()
+        
+
+
+        print('in get date dt is  ------', request.query_params.get('dt', None))
+        # dt = "2020-10-08"
+        dt = request.query_params.get('dt', None)
+        if dt:
+            dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        context={'dt':dt}
+
+        # print('in get list  blaaaaaaaaaa------', request.query_params.get('pk', None))
+        # employee = Employee.objects.all()
+        employee = Employee.objects.filter(owner=self.request.user).all()
+        # attendence = Attendence.objects.all()
+        # serializer = EmployeeAttendenceSerializer(employee, many=True)
+        serializer = EmployeeAttendenceSerializer(employee, context=context,many=True)
+        # serializer = EmployeeSerializer3(e,context=context)
+        # serializer = AttendenceSerializer(attendence, many=True)
+        return Response(serializer.data)
+
+
+
 
 ##########################################################################################
 class AttendenceListCreate(APIView):
@@ -972,15 +1015,23 @@ class AnalyticData(APIView):
             # hr = data.get('hr',None)
             print('hr is -----',hr)
             print('date and hour is----------', dt,hr)
-            dt = datetime.strptime(dt, '%Y-%m-%d').date()
-            hr = datetime.strptime(hr,'%H:%M:%S').time()
-            hr = hr.hour
-            print('date is -------',dt)
+            if dt:
+                dt = datetime.strptime(dt, '%Y-%m-%d').date()
+            if hr:
+                hr = datetime.strptime(hr,'%H:%M:%S').time()
+                hr = hr.hour
+            print('date is --ggggggggggggggggggggggggggg-----',dt)
             print('hr is ---------------*******************',hr)
             # a1 = Analysis1.objects.filter(timestamp__date=dt,timestamp__hour=hr)
             # a2 = Analysis2.objects.filter(timestamp__date=dt,timestamp__hour=hr)
-            a1 = Analysis1.objects.filter(timestamp__date=dt,timestamp__hour=hr)
-            a2 = Analysis2.objects.filter(timestamp__date=dt,timestamp__hour=hr)
+
+
+            a1 = Analysis1.objects.filter(timestamp__date=dt)
+            a2 = Analysis2.objects.filter(timestamp__date=dt)
+            if hr:
+                a1 = Analysis1.objects.filter(timestamp__date=dt).filter(timestamp__hour=hr)
+                a2 = Analysis2.objects.filter(timestamp__date=dt).filter(timestamp__hour=hr)
+
             print('a1 dict ---------',a1.__dict__)
             print('a2 dict ---------',a2.__dict__)
             print('length of query- a1-----',len(a1))
@@ -989,15 +1040,44 @@ class AnalyticData(APIView):
             if len(a1):
                 print('bbbbbbbbbbbbbbbbb---------')
                 l = [ i.__dict__ for i in a1]
+                # print('l is -------',l)
                 l2 = []
 
                 for x in l:
+                    # print('Counter(x) is -----',Counter(x))
                     list(map(x.pop, keys))
+                    # print('Counter(x) is -----',Counter(x))
                     l2.append(Counter(x))
 
                 for i in range(1,len(l2)):
                     l2[i] = l2[i]+l2[i-1]
                 res1 = l2[-1]
+                print('res is blaaaaaaaaaaaaaaaaaaaaaaa ---djfgdhgjgrggggfgfgfrb----',len(l2[-1]),res1)
+                res1b = Counter({
+                    "avg_male_count":0,
+                    "avg_female_count":0,
+                    "age_child":0,
+                    "age_teenge":0,
+                    "age_adult":0,
+                    "age_old":0,
+                    "total_in":0,
+                    "total_out":0,
+                    "customer_walkin":0
+                })
+                res1.update(res1b)
+
+                # if len(res1)==0:
+                #     res1 = Counter({
+                #     "avg_male_count":0,
+                #     "avg_female_count":0,
+                #     "age_child":0,
+                #     "age_teenge":0,
+                #     "age_adult":0,
+                #     "age_old":0,
+                #     "total_in":0,
+                #     "total_out":0,
+                #     "customer_walkin":0
+                # })
 
             else:
                 print('no res for a1 $$$$$$$$$$$$$$$$$$$$')
@@ -1012,6 +1092,7 @@ class AnalyticData(APIView):
                     "total_out":0,
                     "customer_walkin":0
                 })
+                print('res is in else  ---djfgdhgjgrggggfgfgfrb----',res1)
             
             if len(a2): 
                 print('hhaaaa-------------')
@@ -1076,7 +1157,13 @@ class AnalyticData(APIView):
             res2 = dict(res2)
             res3 = {**res1, **res2}
             # res3 = res.update(dict(res2))
-            print('res3 is ---------',res3)
+            # print('res3 is ---------',len(Counter(res3)+Counter(res1)+Counter(res2)), res3)
+            if len(Counter(res3)+Counter(res1)+Counter(res2))==0:
+                flag = False
+            else:
+                flag = True
+            res3.update({"flag":flag})
+            
 
             # return Response({"message":"Got it"})
             return Response(res3,status=status.HTTP_200_OK)   

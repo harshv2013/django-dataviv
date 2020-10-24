@@ -31,6 +31,19 @@ def path_and_rename2(instance, filename):
     return os.path.join(upload_to, filename)
 
 
+def path_and_rename3(instance, filename):
+    upload_to = 'Store_Image'
+    ext = filename.split('.')[-1]
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid4().hex, ext)
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
+
+
 class Organization(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
@@ -63,9 +76,15 @@ class Store(models.Model):
         Organization, related_name='stores', on_delete=models.DO_NOTHING)
 
 
+class StoreImage(models.Model):
+    store_image = models.ImageField(upload_to=path_and_rename3)
+    store = models.OneToOneField(
+        Store, related_name='storeimage', on_delete=models.DO_NOTHING, default=None)
+
+
 class StoreManager(User):
     store = models.OneToOneField(
-        Store, on_delete=models.DO_NOTHING, default=None)
+        Store,related_name='storemanager', on_delete=models.DO_NOTHING, default=None)
 
 
 # class Employee(models.Model):

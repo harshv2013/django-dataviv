@@ -12,4 +12,4 @@ data = json.dumps(data)
 print('data -----',data)
 headers = {"Authorization": "Token 12f720476f74a93fab1f119e5286c355c348fd64", "Content-Type":"application/json"}
 r = requests.post(url='http://34.122.179.12:8000/camera/attendence/', data = data, headers=headers)
-print(r.__dict__)
+print(r)

@@ -19,7 +19,9 @@ from .views import index, \
     Analysis1ListCreate, Analysis1RetriveUpdateDestroy, \
     Analysis2ListCreate, Analysis2RetriveUpdateDestroy, \
     ModelAnalysisListCreate, ModelAnalysisRetriveUpdateDestroy, \
-    AnalyticData
+    AnalyticData, AttendenceList3, \
+    StoreImageListCreate, StoreImageRetriveUpdateDestroy
+
     
     # TestUserListCreate, TestUserRetriveUpdateDestroy
     #  EmployeeList, EmployeeDetail, EmployeeDetailView2
@@ -49,9 +51,13 @@ urlpatterns = [
     path('attendence/', AttendenceListCreate.as_view(), name='attendence-list'),
     path('attendence2/', AttendenceListCreate2.as_view(), name='attendence-list'),
     path('attendence/<int:pk>', AttendenceRetriveUpdateDestroy.as_view(), name='attendence-detail'),
+    path('employeeattendence/', AttendenceList3.as_view(), name='attendence-list'),
 
     path('store/', StoreListCreate.as_view(), name='store-list'),
     path('store/<int:pk>', StoreRetriveUpdateDestroy.as_view(), name='store-detail'),
+    path('storeimage/', StoreImageListCreate.as_view(), name='storeimage-list'),
+    path('storeimage/<int:pk>', StoreImageRetriveUpdateDestroy.as_view(), name='storeimage-detail'),
+
 
     path('analyticsavetodb/', AnalyticListCreate.as_view(), name='analyticsavetodb-list'),
     path('analyticsavetodb/<int:pk>', AnalyticRetriveUpdateDestroy.as_view(), name='analyticsavetodb-detail'),
