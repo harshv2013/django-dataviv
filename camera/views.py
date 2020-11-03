@@ -742,6 +742,7 @@ class AttendenceListCreate(APIView):
         data=request.data
         print('in attendence post request-------------', data)
         image_url = data['image_url']
+        print('image-url-------------------------------------', image_url)
         # boxes = data['boxes']
         store_id = data['store_id']
         image = url_to_image(image_url)
