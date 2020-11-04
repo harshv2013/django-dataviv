@@ -738,11 +738,49 @@ class AttendenceListCreate(APIView):
         serializer = AttendenceSerializer(attendence, many=True)
         return Response(serializer.data)
 
+    # def post(self, request, format=None):
+    #     data=request.data
+    #     print('in attendence post request-------------', data)
+    #     image_url = data['image_url']
+    #     print('image-url-------------------------------------', image_url)
+    #     # boxes = data['boxes']
+    #     store_id = data['store_id']
+    #     image = url_to_image(image_url)
+    #     # boxes = get_box(image)
+    #     boxes = [tuple(data['bound'])]
+    #     print('box from request-----',boxes,type(boxes))
+    #     # boxes = [(442, 802, 1173, 72)]
+    #     # print('boxes hardcoded-----',boxes,type(boxes))
+    #     print('data recived ---------',image_url,boxes,store_id)
+    #     print('image is ----$$$$$$$$$$$$$$$$$$$$$$',image)
+    #     pik = str(store_id)+".pickle"
+    #     # storage_path = "embedding/9/9.pickle"
+    #     storage_path = "embedding/"+str(store_id)+"/"+pik
+    #     # storage_path = "/home/harsh/django-dataviv/embedding/9/9.pickle"
+    #     empid= recognize_face(storage_path, image, boxes)
+    #     print('employee id is -----------------',empid)
+    #     # if empid != "Unknown":
+    #     #     employee = Employee.objects.get(id = empid)
+    #     #     print('employee is ---------------------',employee)
+    #     #     a = Attendence.objects.create(employee=employee)
+    #     #     print('attendence created object is -----------------------',a)
+    #     #     print('attendence created object dictionary  is---------------------- ',a)
+    #     #     return Response({"message":"Attendence proceeded"}, status=status.HTTP_201_CREATED)
+    #                 if len(a)==0:
+    #             a = Attendence.objects.create(employee=employee)
+    #             print('attendence created object is -----------------------',a)
+    #             print('attendence created object dictionary  is---------------------- ',a)
+    #             return Response({"message":"Attendence proceeded"}, status=status.HTTP_201_CREATED)
+    #         else:
+    #             return Response({"message":"Attendence  already done for today"}, status=status.HTTP_208_ALREADY_REPORTED)
+    #     else:
+    #         return Response({"message":"Employee does not exit !"}, status=status.HTTP_400_BAD_REQUEST)
+
     def post(self, request, format=None):
         data=request.data
         print('in attendence post request-------------', data)
         image_url = data['image_url']
-        print('image-url-------------------------------------', image_url)
+        print('image url in attendence view is -----',image_url)
         # boxes = data['boxes']
         store_id = data['store_id']
         image = url_to_image(image_url)
@@ -761,11 +799,19 @@ class AttendenceListCreate(APIView):
         print('employee id is -----------------',empid)
         if empid != "Unknown":
             employee = Employee.objects.get(id = empid)
+            print('employee got is ------------', empid)
             print('employee is ---------------------',employee)
-            a = Attendence.objects.create(employee=employee)
-            print('attendence created object is -----------------------',a)
-            print('attendence created object dictionary  is---------------------- ',a)
-            return Response({"message":"Attendence proceeded"}, status=status.HTTP_201_CREATED)
+            today = today = date.today()
+            a = Attendence.objects.filter(employee_id=employee, created_at__date=today)
+            print('len of a is ---------------', len(a))
+            if len(a)==0:
+                a = Attendence.objects.create(employee=employee)
+                print('attendence created object is -----------------------',a)
+                print('attendence created object dictionary  is---------------------- ',a)
+                return Response({"message":"Attendence proceeded"}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"message":"Attendence  already done for today"}, status=status.HTTP_208_ALREADY_REPORTED)
+                
         else:
             return Response({"message":"Employee does not exit !"}, status=status.HTTP_400_BAD_REQUEST)
 
