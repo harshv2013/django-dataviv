@@ -980,6 +980,8 @@ class ModelAnalysisListCreate(APIView):
     def get(self, request, format=None):
 
         dt = request.query_params.get('dt', None)
+        cltype = request.query_params.get('cltype', None)
+        print('classtype-----------------', cltype)
 
         try:
             # data = request.data
@@ -989,7 +991,27 @@ class ModelAnalysisListCreate(APIView):
             dt = datetime.strptime(dt, '%Y-%m-%d').date()
             # print('in get list ------', request.query_params.get('pk', None))
             # modelanalysis = ModelAnalysis.objects.all()
-            modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt)
+            if cltype:
+                l = []
+                # modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt,classtype=cltype)
+                modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt)
+                print('vhjhhjhvhvhvhhhhhhhhhhhhhhhh',type(modelanalysis))
+                for ma in modelanalysis:
+                    print(ma.__dict__)
+                    print(ma.flag)
+                    if ma.flag == False:
+                        if ma.classtype ==cltype:
+                            l.append(ma)
+                    else:
+                        if ma.updatedclasstype ==cltype:
+                            l.append(ma)
+                print('l is --------', l)
+                modelanalysis = l
+                print('model analysis in cltype req', modelanalysis)
+            else:
+                modelanalysis = ModelAnalysis.objects.filter(timestamp__date=dt)
+                print('model analysis in dt type only', modelanalysis)
+
             serializer = ModelAnalysisSerializer2(modelanalysis, many=True)
             print('serializer data is ----------------',len(serializer.data))
             if len(serializer.data) :
